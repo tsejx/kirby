@@ -1,0 +1,18 @@
+{
+  "name": "@kirby/sdk",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "tsejx",
+  "license": "MIT",
+  "sideEffects": false,
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0"
+  }
+}

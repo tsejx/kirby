@@ -1,0 +1,30 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "lerna -v"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsejx/kirby.git"
+  },
+  "author": {
+    "email": "tsejx@foxmail.com",
+    "name": "Jehoshaphat Tse",
+    "url": "http://mrsingsing.com"
+  },
+  "maintainers": [
+    {
+      "email": "tsejx@foxmail.com",
+      "name": "Jehoshaphat Tse",
+      "url": "http://mrsingsing.com"
+    }
+  ],
+  "homepage": "https://github.com/tsejx/kirby#readme",
+  "bugs": {
+    "url": "https://github.com/tsejx/kirby/issues"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^3.20.2"
+  }
+}
