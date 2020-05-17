@@ -1,0 +1,8 @@
+.editorconfig
+Dockerfile*
+.gitignore
+.prettierignore
+LICENSE
+.eslintcache
+*.lock
+yarn-error.log
