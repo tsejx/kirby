@@ -1,4 +1,4 @@
-import Reporter from './reporter';
+import Reporter from './reporter'
 
 interface KirbyConstructor {
   // new(options: Kirby.InitializeOptions): void;
@@ -14,42 +14,42 @@ interface ResourceItem {
 }
 
 export class Kirby extends Reporter implements KirbyConstructor {
-  private options: Kirby.InitializeOptions;
+  private options: Kirby.InitializeOptions
 
   constructor(options: Kirby.InitializeOptions) {
-    super();
-    this.initialize(options);
+    super()
+    this.initialize(options)
   }
 
   private initialize(options: Kirby.InitializeOptions): void {
     if (!options || !options.appId) {
-      console.warn('Please provid appId in options.');
-      return;
+      console.warn('Please provid appId in options.')
+      return
     }
 
-    const _this = this;
+    const _this = this
 
-    _this.options = options;
+    _this.options = options
 
-    _this.initExceptionListener();
+    _this.initExceptionListener()
     // _this.initInterfaceListener();
 
     window.addEventListener('onload', function () {
       setTimeout(function () {
-        const perf = _this.initPerforamcne();
-        const res = _this.initResource();
-      }, 500);
-    });
+        const perf = _this.initPerforamcne()
+        const res = _this.initResource()
+      }, 500)
+    })
   }
 
   private initExceptionListener(): void {
     window.addEventListener(
       'error',
       (e: ErrorEvent) => {
-        const target = e.target;
+        const target = e.target
 
         if (target instanceof ErrorEvent) {
-          const { message, filename, lineno, colno, error } = target;
+          const { message, filename, lineno, colno, error } = target
 
           const errorInfo = {
             type: 'javascript',
@@ -58,11 +58,11 @@ export class Kirby extends Reporter implements KirbyConstructor {
             msg: error && error.stack ? error.stack : message,
             url: filename,
             timestamp: new Date().getTime(),
-          };
+          }
         }
       },
       true
-    );
+    )
 
     window.addEventListener(
       'unhandledrejection',
@@ -71,10 +71,10 @@ export class Kirby extends Reporter implements KirbyConstructor {
           type: 'promise',
           msg: (e.reason && e.reason.msg) || e.reason || '',
           timestamp: new Date().getTime(),
-        };
+        }
       },
       true
-    );
+    )
   }
 
   private getPerformance(): Performance {
@@ -83,25 +83,25 @@ export class Kirby extends Reporter implements KirbyConstructor {
       window.webkitPerformance ||
       window.msPerformance ||
       window.mozPerformance ||
-      {};
+      {}
 
     performance.now = performance.now ||
       performance.webkitNow ||
       performance.msNow ||
       performance.oNow ||
       function () {
-        return new Date().getTime();
+        return new Date().getTime()
       }
 
-    return performance;
+    return performance
   }
 
   private initPerforamcne() {
-    const perf = this.getPerformance();
+    const perf = this.getPerformance()
 
-    if (!perf || !perf.getEntriesByType) return undefined;
-    const timing = (perf.getEntriesByType('navigation')[0] as PerformanceResourceTiming);
-    const round = Math.round;
+    if (!perf || !perf.getEntriesByType) return undefined
+    const timing = (perf.getEntriesByType('navigation')[0] as PerformanceResourceTiming)
+    const round = Math.round
 
     const {
       fetchStart,
@@ -116,7 +116,7 @@ export class Kirby extends Reporter implements KirbyConstructor {
       domInteractive,
       domContentLoadedEventEnd,
       loadEventStart,
-    } = timing;
+    } = timing
 
     return {
       dns: round(domainLookupEnd - domainLookupStart),
@@ -131,12 +131,12 @@ export class Kirby extends Reporter implements KirbyConstructor {
       tti: round(domInteractive - fetchStart),
       ready: round(domContentLoadedEventEnd - fetchStart),
       load: round(loadEventStart - fetchStart),
-    };
+    }
   }
 
   private initResource() {
-    const perf = this.getPerformance();
-    const resource = (performance.getEntriesByType('resource') as PerformanceResourceTiming[]);
+    const perf = this.getPerformance()
+    const resource = (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
 
     return resource.reduce<Array<ResourceItem>>((acc: Array<ResourceItem>, item) => {
       const conf = {
@@ -146,15 +146,15 @@ export class Kirby extends Reporter implements KirbyConstructor {
         trans: item.responseEnd - item.responseStart,
         duration: item.duration.toFixed(2) || 0,
         dbs: item.decodedBodySize,
-      };
+      }
 
-      return acc.concat([conf]);
-    }, []);
+      return acc.concat([conf])
+    }, [])
   }
 }
 
 export namespace Kirby {
   export interface InitializeOptions {
-    appId: string;
+    appId: string
   }
 }
