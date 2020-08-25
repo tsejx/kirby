@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kirby SDK Test Example</title>
+    <link rel="stylesheet" href="https://assets.segmentfault.com/v-5f23f020/css/detail.css" />
+  </head>
+  <body>
+    <script>
+      !(function (c, b, d, a) {
+        c[a] || (c[a] = {});
+        c[a].options = {
+          appKey: 'dejtsyi1jc@fa60ea0ee8d1b66',
+          url: 'https://localhost:3000/collect',
+        };
+        with (b)
+          with (body)
+            with (insertBefore(createElement('script'), firstChild))
+              setAttribute('crossorigin', '', (src = d));
+      })(window, document, '../dist/kirby-sdk.js', '__kirby__');
+    </script>
+    <script>
+      window.emitResourceLoadError = function () {
+        const script = document.createElement('script');
+        script.src = '1';
+        document.body.append(script);
+      };
+
+      window.emitRuntimeSyntaxError = function () {
+        console.log(abc);
+      };
+
+      window.emitConsoleError = function () {
+        console.error('This is a console.error');
+      };
+
+      window.emitConsoleWarn = function () {
+        console.warn('This is a console.warn');
+      };
+    </script>
+    <div>
+      <button class="Resource Load Error" onclick="emitResourceLoadError()">Resource Load</button>
+      <button class="Runtime Sytax Error" onClick="emitRuntimeSyntaxError()">Runtime Syntax</button>
+      <button class="Promise Error">Promise</button>
+      <button class="Console Error" onClick="emitConsoleError()">Console Error</button>
+      <button class="Console Error" onClick="emitConsoleWarn()">Console Warn</button>
+    </div>
+  </body>
+</html>

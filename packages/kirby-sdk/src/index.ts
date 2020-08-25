@@ -1,28 +1,34 @@
-import { Kirby } from './kirby'
-import { key, hasInitKey } from './utils'
+import Kirby, { KirbyNamespace } from './kirby';
+import { key, hasInitKey } from './utils';
 
-const win = window;
-(win as { [key: string]: any })[key] = Kirby
-const KirbySDK = Kirby
+const win: Window = window;
 
-function initSDK(config: Kirby.InitializeOptions) {
-  const sdk = new window.Kirby(config)
+class KirbySDK extends Kirby {
+  public init(options: KirbyNamespace.Options) {
+    return win[hasInitKey] ? win[key] : initSDK(options);
+  }
+}
+
+function initSDK(options: KirbyNamespace.Options) {
+  const sdk = new Kirby(options);
   win[key] = sdk;
-  (win as { [key: string]: any })[hasInitKey] = true
-  return sdk
+  win[hasInitKey] = true;
+  return sdk;
 }
 
 function initCdnSDK() {
-  if ((win as { [key: string]: any })[hasInitKey]) return win[key]
-  return key in win && initSDK((win as any)[key].config || {})
+  if (win[hasInitKey]) return win[key];
+
+  let options = {} as KirbyNamespace.Options;
+  if (key in win) {
+    options = win[key].options;
+  }
+
+  return initSDK(options);
 }
 
-(KirbySDK as any).init = function (config: Kirby.InitializeOptions) {
-  return (win as any)[hasInitKey] ? win[key] : initSDK(config)
-}
+const isBrowser = 'object' === typeof win && !!win.navigator;
 
-const isBrowser = 'object' === typeof win && !!win.navigator
+isBrowser && win[key] && ((KirbySDK as any).kby = initCdnSDK());
 
-isBrowser && win[key] && ((KirbySDK as any).init = initCdnSDK())
-
-export default KirbySDK
+export default KirbySDK;

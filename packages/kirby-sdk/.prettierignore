@@ -1,8 +1,14 @@
+dist/
+es/
+lib/
+.jest/
+node_modules/
 .editorconfig
 Dockerfile*
-.gitignore
-.prettierignore
 LICENSE
 .eslintcache
-*.lock
 yarn-error.log
+.prettierignore
+.gitignore
+.npmignore
+*.lock

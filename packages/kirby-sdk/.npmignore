@@ -1,0 +1,9 @@
+# **/__mocks__/**
+# **/__tests__/**
+src
+tsconfig.json
+.prettierignore
+.prettierrc.js
+.gitignore
+.editorconfig
+.jest/

@@ -1,20 +1,31 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "baseUrl": "./",
+    "target": "es5",
     "module": "es2015",
-    "target": "es2015",
-    "lib": ["es5", "es6", "es2017", "es2018", "dom"],
+    "moduleResolution": "node",
+    "lib": ["es2020", "es2015", "es2017", "dom", "scripthost"],
+    "typeRoots": ["node_modules/@types"],
+    "declaration": true,
+    "sourceMap": true,
     "rootDir": "src",
     "removeComments": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "noImplicitThis": false,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "declaration": true
+    "skipLibCheck": true
   },
   "formatCodeOptions": {
     "indentSize": 2,
     "tabSize": 2
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "tests/**/*.ts"]
 }

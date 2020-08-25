@@ -26,6 +26,7 @@ module.exports = {
   },
   plugins: [
     typescript({
+      module: 'es2015',
       target: 'es5',
       declaration: false,
     }),

@@ -1,160 +1,119 @@
-import Reporter from './reporter'
+import Fingerprint2 from 'fingerprintjs2';
+import initExceptionListener from './exception';
+import initPerformance from './performance';
+import initBehavior from './behavior';
+import defaultOptions from './defaultOptions';
+import { warning } from './utils';
 
-interface KirbyConstructor {
-  // new(options: Kirby.InitializeOptions): void;
-}
+export default class Kirby {
+  private options: KirbyNamespace.Options;
 
-interface ResourceItem {
-  type: InitiatorTypes | 'all' | undefined,
-  name: string,
-  ptc: string,
-  trans: number,
-  duration: string | number,
-  dbs: number,
-}
+  constructor(options: KirbyNamespace.Options) {
+    const initFPCallback = this.initFingerPrintCallback.bind(this, options);
 
-export class Kirby extends Reporter implements KirbyConstructor {
-  private options: Kirby.InitializeOptions
-
-  constructor(options: Kirby.InitializeOptions) {
-    super()
-    this.initialize(options)
-  }
-
-  private initialize(options: Kirby.InitializeOptions): void {
-    if (!options || !options.appId) {
-      console.warn('Please provid appId in options.')
-      return
+    if (window.requestIdleCallback) {
+      requestIdleCallback(initFPCallback);
+    } else {
+      setTimeout(initFPCallback, 500);
     }
 
-    const _this = this
-
-    _this.options = options
-
-    _this.initExceptionListener()
-    // _this.initInterfaceListener();
-
-    window.addEventListener('onload', function () {
-      setTimeout(function () {
-        const perf = _this.initPerforamcne()
-        const res = _this.initResource()
-      }, 500)
-    })
+    return this;
   }
 
-  private initExceptionListener(): void {
-    window.addEventListener(
-      'error',
-      (e: ErrorEvent) => {
-        const target = e.target
+  private initFingerPrintCallback(options: KirbyNamespace.Options) {
+    const _this = this;
 
-        if (target instanceof ErrorEvent) {
-          const { message, filename, lineno, colno, error } = target
+    Fingerprint2.get(function (components) {
+      const values = components.map((component) => component.value);
+      const uuid = Fingerprint2.x64hash128(values.join(''), 31);
 
-          const errorInfo = {
-            type: 'javascript',
-            row: lineno,
-            col: colno,
-            msg: error && error.stack ? error.stack : message,
-            url: filename,
-            timestamp: new Date().getTime(),
-          }
-        }
-      },
-      true
-    )
+      options = {
+        ...options,
+        uuid,
+      };
 
-    window.addEventListener(
-      'unhandledrejection',
-      (e: PromiseRejectionEvent) => {
-        const errorInfo = {
-          type: 'promise',
-          msg: (e.reason && e.reason.msg) || e.reason || '',
-          timestamp: new Date().getTime(),
-        }
-      },
-      true
-    )
+      const mergeOptions = _this.mergeOptions(options);
+
+      if (!mergeOptions) return;
+
+      _this.options = mergeOptions;
+      _this.initialize(_this.options);
+    });
   }
 
-  private getPerformance(): Performance {
-    const performance =
-      window.performance ||
-      window.webkitPerformance ||
-      window.msPerformance ||
-      window.mozPerformance ||
-      {}
+  private mergeOptions(options: KirbyNamespace.Options) {
+    options = Object.assign({}, defaultOptions, options);
 
-    performance.now = performance.now ||
-      performance.webkitNow ||
-      performance.msNow ||
-      performance.oNow ||
-      function () {
-        return new Date().getTime()
-      }
-
-    return performance
-  }
-
-  private initPerforamcne() {
-    const perf = this.getPerformance()
-
-    if (!perf || !perf.getEntriesByType) return undefined
-    const timing = (perf.getEntriesByType('navigation')[0] as PerformanceResourceTiming)
-    const round = Math.round
-
-    const {
-      fetchStart,
-      domainLookupStart,
-      domainLookupEnd,
-      connectStart,
-      connectEnd,
-      secureConnectionStart,
-      requestStart,
-      responseStart,
-      responseEnd,
-      domInteractive,
-      domContentLoadedEventEnd,
-      loadEventStart,
-    } = timing
-
-    return {
-      dns: round(domainLookupEnd - domainLookupStart),
-      tcp: round(connectEnd - connectStart),
-      ssl: round(connectEnd - secureConnectionStart),
-      ttfb: round(responseStart - requestStart),
-      trans: round(responseEnd - responseStart),
-      dom: round(domInteractive - responseEnd),
-      res: round(loadEventStart - domContentLoadedEventEnd),
-      fb: round(responseStart - domainLookupStart),
-      fpt: round(responseEnd - fetchStart),
-      tti: round(domInteractive - fetchStart),
-      ready: round(domContentLoadedEventEnd - fetchStart),
-      load: round(loadEventStart - fetchStart),
+    if (!options.appKey) {
+      warning('Option `appKey` is required to provided but not found.');
+      return null;
     }
+
+    if (!options.url) {
+      warning('Option `url` is required to provided but not found.');
+      return null;
+    }
+
+    if (!options.uuid) {
+      warning('Option `uuid` is required to provided but not found.');
+      return null;
+    }
+
+    return options;
   }
 
-  private initResource() {
-    const perf = this.getPerformance()
-    const resource = (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+  private initialize(options: KirbyNamespace.Options): void {
+    if (!options || !options.appKey) {
+      warning('Please provid appKey in options');
+      return;
+    }
 
-    return resource.reduce<Array<ResourceItem>>((acc: Array<ResourceItem>, item) => {
-      const conf = {
-        type: item.initatorType,
-        name: item.name,
-        ptc: item.nextHopProtocol,
-        trans: item.responseEnd - item.responseStart,
-        duration: item.duration.toFixed(2) || 0,
-        dbs: item.decodedBodySize,
-      }
-
-      return acc.concat([conf])
-    }, [])
+    initExceptionListener(options);
+    initPerformance(options);
+    initBehavior(options);
   }
 }
 
-export namespace Kirby {
-  export interface InitializeOptions {
-    appId: string
+export namespace KirbyNamespace {
+  export interface Options {
+    /**
+     * appKey: Application Identifier
+     */
+    appKey: string | undefined | null;
+
+    /**
+     * url: Report URL
+     */
+    url: string | undefined | null;
+
+    /**
+     * uuid: User Identifier
+     */
+    uuid: string | undefined | null;
+
+    /**
+     * jsErr: Whether to report JavaScript Runtime Error
+     */
+    jsErr: boolean;
+
+    /**
+     * resRrr: Whether to report resource failed loaded error
+     */
+    resErr: boolean;
+
+    /**
+     * ajaxErr: Whether to report ajax / fetch error
+     */
+    ajaxErr: boolean;
+
+    /**
+     * consoleErr: Whether to report console.error message
+     */
+    consoleErr: boolean;
+
+    /**
+     * scriptErr: Whether to report third party script error
+     */
+    scriptErr: boolean;
   }
 }
